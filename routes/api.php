@@ -1,13 +1,17 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\GenreController;
+use App\Http\Controllers\MediaItemController;
 use App\Http\Controllers\MovieController;
 use App\Http\Controllers\PersonController;
+use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TrendingController;
 use App\Http\Controllers\TvShowController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\WatchlistItemController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -38,53 +42,79 @@ Route::controller(AuthController::class)->group(function () {
 
 Route::middleware(['auth:sanctum', 'verified'])->group(function () {
 
-    // User routes
     Route::post('logout', [AuthController::class, 'logout']);
     Route::controller(UserController::class)->group(function () {
         Route::get('user', 'user');
     });
 
-    // ==================== MOVIES ====================
-    Route::prefix('movies')->group(function () {
-        Route::get('popular', [MovieController::class, 'popular']);
-        Route::get('top-rated', [MovieController::class, 'topRated']);
-        Route::get('upcoming', [MovieController::class, 'upcoming']);
-        Route::get('now-playing', [MovieController::class, 'nowPlaying']);
-        Route::get('search', [MovieController::class, 'search']);
-        Route::get('genre/{genreId}', [MovieController::class, 'discoverByGenre']);
-        Route::get('{id}', [MovieController::class, 'show']);
-        Route::get('{id}/similar', [MovieController::class, 'similar']);
-        Route::get('{id}/recommendations', [MovieController::class, 'recommendations']);
+    Route::prefix('movies')->controller(MovieController::class)->group(function () {
+        Route::get('popular', 'popular');
+        Route::get('top-rated', 'topRated');
+        Route::get('upcoming', 'upcoming');
+        Route::get('now-playing', 'nowPlaying');
+        Route::get('search', 'search');
+        Route::get('genre/{genreId}', 'discoverByGenre');
+
+        Route::get('{id}', 'show');
+        Route::get('{id}/similar', 'similar');
+        Route::get('{id}/recommendations', 'recommendations');
     });
 
-    // ==================== TV SHOWS ====================
-    Route::prefix('tv')->group(function () {
-        Route::get('popular', [TvShowController::class, 'popular']);
-        Route::get('top-rated', [TvShowController::class, 'topRated']);
-        Route::get('airing-today', [TvShowController::class, 'airingToday']);
-        Route::get('on-the-air', [TvShowController::class, 'onTheAir']);
-        Route::get('search', [TvShowController::class, 'search']);
-        Route::get('genre/{genreId}', [TvShowController::class, 'discoverByGenre']);
-        Route::get('{id}', [TvShowController::class, 'show']);
-        Route::get('{id}/season/{seasonNumber}', [TvShowController::class, 'season']);
-        Route::get('{id}/similar', [TvShowController::class, 'similar']);
+    Route::prefix('tv')->controller(TvShowController::class)->group(function () {
+        Route::get('popular', 'popular');
+        Route::get('top-rated', 'topRated');
+        Route::get('airing-today', 'airingToday');
+        Route::get('on-the-air', 'onTheAir');
+        Route::get('search', 'search');
+        Route::get('genre/{genreId}', 'discoverByGenre');
+
+        Route::get('{id}', 'show');
+        Route::get('{id}/season/{seasonNumber}', 'season');
+        Route::get('{id}/similar', 'similar');
     });
 
-    // ==================== GENRES ====================
-    Route::prefix('genres')->group(function () {
-        Route::get('movies', [GenreController::class, 'movies']);
-        Route::get('tv', [GenreController::class, 'tvShows']);
+    Route::prefix('genres')->controller(GenreController::class)->group(function () {
+        Route::get('movies', 'movies');
+        Route::get('tv', 'tvShows');
     });
 
-    // ==================== SEARCH ====================
-    Route::prefix('search')->group(function () {
-        Route::get('multi', [SearchController::class, 'multi']);
-        Route::get('people', [SearchController::class, 'people']);
+    Route::prefix('search')->controller(SearchController::class)->group(function () {
+        Route::get('multi', 'multi');
+        Route::get('people', 'people');
     });
 
-    // ==================== TRENDING ====================
     Route::get('trending', [TrendingController::class, 'index']);
 
-    // ==================== PEOPLE ====================
     Route::get('person/{id}', [PersonController::class, 'show']);
+
+    /* Not TMDB Related */
+
+    Route::prefix('media')->controller(MediaItemController::class)->group(function () {
+        Route::get('/', 'index');
+        Route::get('{mediaItem}', 'show');
+    });
+
+    Route::prefix('watchlist')->controller(WatchlistItemController::class)->group(function () {
+        Route::get('/', 'index');
+        Route::post('/', 'store');
+        Route::delete('/{watchlistItem}', 'destroy');
+    });
+
+    Route::prefix('favorites')->controller(FavoriteController::class)->group(function () {
+        Route::get('/', 'index');
+        Route::post('/', 'store');
+        Route::delete('/{favorite}', 'destroy');
+    });
+
+    Route::prefix('reviews')->controller(ReviewController::class)->group(function () {
+        Route::get('/', 'index');
+        Route::post('/', 'store');
+        Route::get('/{review}', 'show');
+        Route::delete('/{review}', 'destroy');
+    });
+
+    Route::prefix('users')->controller(UserController::class)->group(function () {
+        Route::get('search', 'search');
+        Route::get('{user}', 'show');
+    });
 });
