@@ -41,4 +41,12 @@ return [
         'image_base_url' => env('TMDB_IMAGE_BASE_URL', 'https://image.tmdb.org/t/p'),
     ],
 
+    'assemblyai' => [
+        'base_url' => env('AI_BASE_URL', 'https://llm-gateway.assemblyai.com/v1/chat/completions'),
+        'api_key' => env('AI_API_KEY'),
+        'model' => env('AI_MODEL', 'gpt-4.1'),
+        'temperature' => env('AI_TEMPERATURE', 0.5),
+        'max_tokens' => env('AI_MAX_TOKENS', 500),
+    ],
+
 ];

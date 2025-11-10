@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AiController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\GenreController;
@@ -86,6 +87,12 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::get('trending', [TrendingController::class, 'index']);
 
     Route::get('person/{id}', [PersonController::class, 'show']);
+
+    /* AI Related */
+    Route::prefix('ai')->controller(AiController::class)->group(function () {
+        Route::get('search', 'search');
+        Route::get('limit', 'getLimit');
+    });
 
     /* Not TMDB Related */
 
