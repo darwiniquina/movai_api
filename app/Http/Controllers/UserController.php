@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\User\UpdatePasswordRequest;
+use App\Http\Requests\User\UpdateUserRequest;
 use App\Models\User;
+use App\Models\WatchlistItem;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -13,15 +17,75 @@ class UserController extends Controller
     {
         $user = Auth::user();
 
+        $watch_list_count = WatchlistItem::where('user_id', $user->id)->get();
+
+        $to_watch_count = $watch_list_count->where('status', 'planning')->count();
+        $completed_count = $watch_list_count->where('status', 'completed')->count();
+
         return response()->json([
             'user' => [
                 'id' => $user->id,
                 'name' => $user->name,
+                'username' => $user->username,
+                'bio' => $user->bio,
+                'public_profile' => $user->public_profile,
+                'email' => $user->email,
+                'email_verified_at' => $user->email_verified_at,
+                'to_watch_count' => $to_watch_count,
+                'completed_count' => $completed_count,
+                'created_at' => $user->created_at,
+                'updated_at' => $user->updated_at,
+            ],
+        ]);
+    }
+
+    public function update(UpdateUserRequest $request)
+    {
+        $validated = $request->validated();
+
+        $user = Auth::user();
+
+        $user->name = $validated['name'] ?? $user->name;
+        $user->display_name = $validated['display_name'] ?? $user->display_name;
+        $user->bio = $validated['bio'] ?? $user->bio;
+        $user->public_profile = $validated['public_profile'] ?? $user->public_profile;
+
+        $user->save();
+
+        return response()->json([
+            'message' => 'User updated successfully.',
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'username' => $user->username,
+                'bio' => $user->bio,
+                'public_profile' => $user->public_profile,
                 'email' => $user->email,
                 'email_verified_at' => $user->email_verified_at,
                 'created_at' => $user->created_at,
                 'updated_at' => $user->updated_at,
             ],
+        ]);
+    }
+
+    public function updatePassword(UpdatePasswordRequest $request)
+    {
+        $validated = $request->validated();
+
+        $user = Auth::user();
+
+        if (! Hash::check($request->input('current_password'), $user->password)) {
+            return response()->json([
+                'message' => 'Current password is incorrect.',
+            ], 422);
+        }
+
+        $user->password = Hash::make($validated['password']);
+
+        $user->save();
+
+        return response()->json([
+            'message' => 'Password updated successfully.',
         ]);
     }
 
