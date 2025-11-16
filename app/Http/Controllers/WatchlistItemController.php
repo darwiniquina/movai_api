@@ -6,6 +6,7 @@ use App\Http\Requests\WatchList\StoreWatchlistReqeuest;
 use App\Models\WatchlistItem;
 use App\Traits\hasMediaItem;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class WatchlistItemController extends Controller
 {
@@ -15,6 +16,20 @@ class WatchlistItemController extends Controller
     {
         /** @disregard */
         return Auth::user()->watchlistItems()->with('mediaItem')->get();
+    }
+
+    public function onWatchlist($tmdb_id)
+    {
+        $exists = DB::table('watchlist_items')
+            ->join('media_items', 'media_items.id', 'watchlist_items.media_item_id')
+            ->where('watchlist_items.user_id', Auth::id())
+            ->where('media_items.tmdb_id', $tmdb_id)
+            ->exists();
+
+        return response()->json([
+            'success' => true,
+            'exists' => $exists,
+        ]);
     }
 
     public function store(StoreWatchlistReqeuest $request)
