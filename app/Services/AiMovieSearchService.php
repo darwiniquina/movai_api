@@ -20,17 +20,17 @@ class AiMovieSearchService
                 [
                     'role' => 'system',
                     'content' => <<<'SYS'
-You are a helpful assistant that returns only movie titles in JSON format.
-Remove any years, subtitles, or extra text — keep only the clean, main title.
-Return an array of distinct movie titles that best match the user's description.
+You are a helpful assistant that returns only movies, TV series, or people (actors/directors/etc.) in JSON format.
+Remove any years, subtitles, or extra text — keep only the clean, main name/title.
+Return an array of distinct names/titles that best match the user's description.
 SYS,
                 ],
                 [
                     'role' => 'user',
                     'content' => <<<USR
-List up to {$limit} movies that match this description: "{$query}".
-Return a JSON array of clean titles only, like:
-["Title 1", "Title 2", "Title 3"]
+List up to {$limit} movies, TV series, or people that match this description: "{$query}".
+Return a JSON array of clean names/titles only, like:
+["Title 1", "Title 2", "Person 1"]
 USR,
                 ],
             ];
