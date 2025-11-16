@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Services\TmdbService;
+use App\Traits\hasApiError;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class MovieController extends Controller
 {
+    use hasApiError;
+
     protected TmdbService $tmdbService;
 
     public function __construct(TmdbService $tmdbService)
@@ -26,13 +29,7 @@ class MovieController extends Controller
                 'data' => $data,
             ]);
         } catch (\Exception $e) {
-            dd($e);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to fetch popular movies',
-                'error' => $e->getMessage(),
-            ], 500);
+            return $this->apiError($e->getMessage());
         }
     }
 
@@ -47,11 +44,7 @@ class MovieController extends Controller
                 'data' => $data,
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to fetch top rated movies',
-                'error' => $e->getMessage(),
-            ], 500);
+            return $this->apiError($e->getMessage());
         }
     }
 
@@ -66,11 +59,7 @@ class MovieController extends Controller
                 'data' => $data,
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to fetch upcoming movies',
-                'error' => $e->getMessage(),
-            ], 500);
+            return $this->apiError($e->getMessage());
         }
     }
 
@@ -85,11 +74,7 @@ class MovieController extends Controller
                 'data' => $data,
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to fetch now playing movies',
-                'error' => $e->getMessage(),
-            ], 500);
+            return $this->apiError($e->getMessage());
         }
     }
 
@@ -103,11 +88,7 @@ class MovieController extends Controller
                 'data' => $data,
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to fetch movie details',
-                'error' => $e->getMessage(),
-            ], 500);
+            return $this->apiError($e->getMessage());
         }
     }
 
@@ -122,11 +103,7 @@ class MovieController extends Controller
                 'data' => $data,
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to fetch similar movies',
-                'error' => $e->getMessage(),
-            ], 500);
+            return $this->apiError($e->getMessage());
         }
     }
 
@@ -141,11 +118,7 @@ class MovieController extends Controller
                 'data' => $data,
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to fetch movie recommendations',
-                'error' => $e->getMessage(),
-            ], 500);
+            return $this->apiError($e->getMessage());
         }
     }
 
@@ -165,11 +138,7 @@ class MovieController extends Controller
                 'data' => $data,
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to search movies',
-                'error' => $e->getMessage(),
-            ], 500);
+            return $this->apiError($e->getMessage());
         }
     }
 
@@ -186,11 +155,7 @@ class MovieController extends Controller
                 'data' => $data,
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to discover movies',
-                'error' => $e->getMessage(),
-            ], 500);
+            return $this->apiError($e->getMessage());
         }
     }
 }

@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Services\TmdbService;
+use App\Traits\hasApiError;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class SearchController extends Controller
 {
+    use hasApiError;
+
     protected TmdbService $tmdbService;
 
     public function __construct(TmdbService $tmdbService)
@@ -31,11 +34,7 @@ class SearchController extends Controller
                 'data' => $data,
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to perform multi search',
-                'error' => $e->getMessage(),
-            ], 500);
+            return $this->apiError($e);
         }
     }
 
@@ -55,11 +54,7 @@ class SearchController extends Controller
                 'data' => $data,
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to search people',
-                'error' => $e->getMessage(),
-            ], 500);
+            return $this->apiError($e);
         }
     }
 }
