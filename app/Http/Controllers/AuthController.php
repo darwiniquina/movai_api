@@ -4,11 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Requests\Auth\ResendEmailRequest;
 use App\Models\User;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 
@@ -50,24 +50,20 @@ class AuthController extends Controller
         }
     }
 
-    public function resendVerification(Request $request): JsonResponse
+    public function resendVerification(ResendEmailRequest $request): JsonResponse
     {
-        $user = Auth::user();
+        $email = $request->validated('email');
+
+        $user = User::where('email', $email)->first();
 
         if (! $user) {
-            return response()->json([
-                'message' => 'Unauthorized.',
-            ], 401);
+            return response()->json(['message' => 'User not found.'], 404);
         }
 
-        /**@disregard */
         if ($user->hasVerifiedEmail()) {
-            return response()->json([
-                'message' => 'Email already verified.',
-            ], 422);
+            return response()->json(['message' => 'Email already verified.'], 422);
         }
 
-        /**@disregard */
         $user->sendEmailVerificationNotification();
 
         return response()->json([
@@ -80,11 +76,7 @@ class AuthController extends Controller
         try {
             $validated = $request->validated();
 
-            $user = User::create([
-                'name' => $validated['name'],
-                'email' => $validated['email'],
-                'password' => Hash::make($validated['password']),
-            ]);
+            $user = User::create($validated);
 
             $user->sendEmailVerificationNotification();
 
@@ -131,7 +123,7 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'access_token' => $token,
+            'token' => $token,
             'token_type' => 'Bearer',
             'user' => [
                 'id' => $user->id,
