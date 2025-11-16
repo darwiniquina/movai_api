@@ -8,6 +8,7 @@ use App\Services\TmdbService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class AiController extends Controller
 {
@@ -26,32 +27,41 @@ class AiController extends Controller
 
     public function search(Request $request, TmdbService $tmdb, AiMovieSearchService $ai)
     {
-        $this->checkAiLimit();
+        try {
 
-        $query = $request->input('query');
+            DB::beginTransaction();
 
-        if (! $query) {
-            return response()->json(['error' => 'Query required.'], 400);
-        }
+            $this->checkAiLimit();
 
-        $suggestedTitles = $ai->fetchTitles($query);
+            $query = $request->input('query');
 
-        $results = collect();
-
-        foreach ($suggestedTitles as $title) {
-            $search = $tmdb->multiSearch($title);
-
-            // merge results, taking top 1–2 per title from TMDB
-            if (! empty($search['results'])) {
-                $results = $results->merge(array_slice($search['results'] ?? [], 0, 2));
+            if (! $query) {
+                return response()->json(['error' => 'Query required.'], 400);
             }
-        }
 
-        return response()->json([
-            'query' => $query,
-            'suggested_titles' => $suggestedTitles,
-            'results' => $results->values(),
-        ]);
+            $suggestedTitles = $ai->fetchTitles($query);
+
+            $results = collect();
+
+            foreach ($suggestedTitles as $title) {
+                $search = $tmdb->multiSearch($title);
+
+                // merge results, taking top 1–2 per title from TMDB
+                if (! empty($search['results'])) {
+                    $results = $results->merge(array_slice($search['results'] ?? [], 0, 2));
+                }
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'query' => $query,
+                'suggested_titles' => $suggestedTitles,
+                'results' => $results->values(),
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+        }
     }
 
     protected function checkAiLimit()
