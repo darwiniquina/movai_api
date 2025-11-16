@@ -46,6 +46,8 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::controller(UserController::class)->group(function () {
         Route::get('user', 'user');
+        Route::post('user', 'update');
+        Route::post('user/password', 'updatePassword');
     });
 
     Route::prefix('movies')->controller(MovieController::class)->group(function () {
@@ -103,6 +105,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
 
     Route::prefix('watchlist')->controller(WatchlistItemController::class)->group(function () {
         Route::get('/', 'index');
+        Route::get('/{tmdbId}', 'onWatchlist');
         Route::post('/', 'store');
         Route::delete('/{watchlistItem}', 'destroy');
     });
