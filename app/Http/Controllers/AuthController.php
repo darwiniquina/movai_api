@@ -68,8 +68,6 @@ class AuthController extends Controller
             'message' => 'Verification link sent to your email.',
         ], 200);
 
-        fastcgi_finish_request();
-
         $user->sendEmailVerificationNotification();
 
         return $response;
@@ -79,6 +77,7 @@ class AuthController extends Controller
     {
         try {
             $validated = $request->validated();
+            $validated['email_verified_at'] = now();
 
             $user = User::create($validated);
 
@@ -91,9 +90,7 @@ class AuthController extends Controller
                 ],
             ], 201);
 
-            fastcgi_finish_request();
-
-            $user->sendEmailVerificationNotification();
+            // $user->sendEmailVerificationNotification();
 
             return $response;
 
