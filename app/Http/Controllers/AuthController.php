@@ -64,11 +64,15 @@ class AuthController extends Controller
             return response()->json(['message' => 'Email already verified.'], 422);
         }
 
-        $user->sendEmailVerificationNotification();
-
-        return response()->json([
+        $response = response()->json([
             'message' => 'Verification link sent to your email.',
         ], 200);
+
+        fastcgi_finish_request();
+
+        $user->sendEmailVerificationNotification();
+
+        return $response;
     }
 
     public function register(RegisterRequest $request): JsonResponse
@@ -78,9 +82,7 @@ class AuthController extends Controller
 
             $user = User::create($validated);
 
-            $user->sendEmailVerificationNotification();
-
-            return response()->json([
+            $response = response()->json([
                 'message' => 'Registration successful. Please check your email for verification link.',
                 'user' => [
                     'id' => $user->id,
@@ -88,6 +90,12 @@ class AuthController extends Controller
                     'email' => $user->email,
                 ],
             ], 201);
+
+            fastcgi_finish_request();
+
+            $user->sendEmailVerificationNotification();
+
+            return $response;
 
         } catch (\Exception $e) {
             Log::error('Registration failed', [
