@@ -13,25 +13,17 @@ class AiMovieSearchService
             return [];
         }
 
-        $config = config('services.assemblyai');
+        $config = config('services.cerebras');
 
         try {
             $messages = [
                 [
                     'role' => 'system',
-                    'content' => <<<'SYS'
-You are a helpful assistant that returns only movies, TV series, or people (actors/directors/etc.) in JSON format.
-Remove any years, subtitles, or extra text — keep only the clean, main name/title.
-Return an array of distinct names/titles that best match the user's description.
-SYS,
+                    'content' => 'Return only movie, series, or person names in a JSON array. No years, subtitles, or extra text — just clean distinct titles.',
                 ],
                 [
                     'role' => 'user',
-                    'content' => <<<USR
-List up to {$limit} movies, TV series, or people that match this description: "{$query}".
-Return a JSON array of clean names/titles only, like:
-["Title 1", "Title 2", "Person 1"]
-USR,
+                    'content' => "Give up to {$limit} matches for: \"{$query}\".\nFormat: [\"Title 1\", \"Title 2\", \"Person 1\"]",
                 ],
             ];
 

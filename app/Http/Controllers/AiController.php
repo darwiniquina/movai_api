@@ -9,10 +9,11 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AiController extends Controller
 {
-    public const MAX_LIMIT = 10;
+    public const MAX_LIMIT = 5;
 
     public function getLimit()
     {
@@ -60,6 +61,7 @@ class AiController extends Controller
                 'results' => $results->values(),
             ]);
         } catch (\Exception $e) {
+            Log::error('AI search error', ['error' => $e->getMessage()]);
             DB::rollBack();
         }
     }

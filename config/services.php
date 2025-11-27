@@ -41,12 +41,15 @@ return [
         'image_base_url' => env('TMDB_IMAGE_BASE_URL', 'https://image.tmdb.org/t/p'),
     ],
 
-    'assemblyai' => [
-        'base_url' => env('AI_BASE_URL', 'https://llm-gateway.assemblyai.com/v1/chat/completions'),
-        'api_key' => env('AI_API_KEY'),
-        'model' => env('AI_MODEL', 'gpt-4.1'),
-        'temperature' => env('AI_TEMPERATURE', 0.5),
-        'max_tokens' => env('AI_MAX_TOKENS', 500),
+    'cerebras' => [
+        'base_url' => env('CEREBRAS_BASE_URL', 'https://api.cerebras.ai/v1/chat/completions'),
+        'api_key' => env('CEREBRAS_API_KEY'),
+        'model' => env('CEREBRAS_MODEL', 'llama-3.3-70b'),
+        'max_completion_tokens' => env('CEREBRAS_MAX_COMPLETION_TOKENS', 1024),
+        'max_tokens' => env('CEREBRAS_MAX_TOKENS', 500),
+        'temperature' => env('CEREBRAS_TEMPERATURE', 0.2),
+        'top_p' => env('CEREBRAS_TOP_P', 1),
+        'stream' => env('CEREBRAS_STREAM', false),
     ],
 
 ];
