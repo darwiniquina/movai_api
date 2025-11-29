@@ -47,7 +47,7 @@ Route::controller(AuthController::class)->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth:sanctum', 'verified'])->group(function () {
+Route::middleware(['auth:sanctum', 'verified', 'throttle:60,1'])->group(function () {
 
     Route::post('logout', [AuthController::class, 'logout']);
     Route::controller(UserController::class)->group(function () {
