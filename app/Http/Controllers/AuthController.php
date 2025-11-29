@@ -6,11 +6,15 @@ use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\ResendEmailRequest;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\URL;
+use SendGrid;
+use SendGrid\Mail\Mail;
 
 class AuthController extends Controller
 {
@@ -77,22 +81,39 @@ class AuthController extends Controller
     {
         try {
             $validated = $request->validated();
-            $validated['email_verified_at'] = now();
 
             $user = User::create($validated);
 
-            $response = response()->json([
-                'message' => 'Registration successful. Please check your email for verification link.',
+            $verification_url = URL::temporarySignedRoute(
+                'verification.verify',
+                Carbon::now()->addMinutes(60),
+                ['id' => $user->id, 'hash' => sha1($user->email)]
+            );
+
+            $email = new Mail;
+            $email->setFrom(env('MAIL_FROM_ADDRESS'), env('APP_NAME'));
+            $email->setSubject('Welcome to '.env('APP_NAME').'! Verify Your Email');
+            $email->addTo($user->email, $user->name);
+
+            $emailContent = view('emails.custom_verification', [
+                'url' => $verification_url,
+                'user' => $user,
+                'appName' => env('APP_NAME'),
+            ])->render();
+
+            $email->addContent('text/html', $emailContent);
+
+            $sendgrid = new SendGrid(env('SENDGRID_API_KEY'));
+            $sendgrid->send($email);
+
+            return response()->json([
+                'message' => 'Registration successful. Please check your email for the verification link.',
                 'user' => [
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
                 ],
             ], 201);
-
-            // $user->sendEmailVerificationNotification();
-
-            return $response;
 
         } catch (\Exception $e) {
             Log::error('Registration failed', [
