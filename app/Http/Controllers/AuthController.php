@@ -18,29 +18,25 @@ use SendGrid\Mail\Mail;
 
 class AuthController extends Controller
 {
-    public function verifyEmail(Request $request, $id, $hash): JsonResponse
+    public function verifyEmail(Request $request, $id, $hash)
     {
         try {
             $user = User::findOrFail($id);
 
             if (! hash_equals(sha1($user->getEmailForVerification()), $hash)) {
-                return response()->json([
-                    'message' => 'Invalid or expired verification link.',
-                ], 400);
+                $message = 'Oops! This verification link is invalid or expired.';
+            } elseif ($user->hasVerifiedEmail()) {
+                $message = 'Welcome back! Your email is already verified.';
+            } else {
+                $user->markEmailAsVerified();
+                event(new Verified($user));
+
+                $message = 'Email verified successfully! ';
             }
 
-            if ($user->hasVerifiedEmail()) {
-                return response()->json([
-                    'message' => 'Email already verified.',
-                ], 200);
-            }
-
-            $user->markEmailAsVerified();
-            event(new Verified($user));
-
-            return response()->json([
-                'message' => 'Email verified successfully.',
-            ], 200);
+            return view('auth.verify-email', [
+                'message' => $message,
+            ]);
 
         } catch (\Exception $e) {
             Log::error('Email verification failed', [
@@ -48,9 +44,9 @@ class AuthController extends Controller
                 'error' => $e->getMessage(),
             ]);
 
-            return response()->json([
-                'message' => 'Verification failed.',
-            ], 500);
+            return view('auth.verify-email', [
+                'message' => 'Something went wrong. Please try again later.',
+            ]);
         }
     }
 
