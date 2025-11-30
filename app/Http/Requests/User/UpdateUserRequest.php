@@ -21,6 +21,7 @@ class UpdateUserRequest extends FormRequest
             'display_name' => 'nullable|string',
             'bio' => 'nullable|string',
             'public_profile' => 'boolean',
+            'emoji_avatar' => 'nullable|string',
         ];
     }
 }

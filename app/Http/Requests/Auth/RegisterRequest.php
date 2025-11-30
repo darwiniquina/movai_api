@@ -31,6 +31,7 @@ class RegisterRequest extends FormRequest
                 'confirmed',
                 Password::min(6),
             ],
+            'emoji_avatar' => 'nullable|string|max:10',
         ];
     }
 

@@ -29,6 +29,7 @@ class UserController extends Controller
                 'username' => $user->username,
                 'bio' => $user->bio,
                 'public_profile' => $user->public_profile,
+                'emoji_avatar' => $user->emoji_avatar,
                 'email' => $user->email,
                 'email_verified_at' => $user->email_verified_at,
                 'to_watch_count' => $to_watch_count,
@@ -49,7 +50,9 @@ class UserController extends Controller
         $user->display_name = $validated['display_name'] ?? $user->display_name;
         $user->bio = $validated['bio'] ?? $user->bio;
         $user->public_profile = $validated['public_profile'] ?? $user->public_profile;
+        $user->emoji_avatar = $validated['emoji_avatar'] ?? $user->emoji_avatar;
 
+        /**@disregard */
         $user->save();
 
         return response()->json([
@@ -82,6 +85,7 @@ class UserController extends Controller
 
         $user->password = Hash::make($validated['password']);
 
+        /**@disregard */
         $user->save();
 
         return response()->json([
@@ -98,9 +102,10 @@ class UserController extends Controller
         }
 
         $users = User::query()
+            ->where('email', 'like', "%{$query}%")
             ->where('username', 'like', "%{$query}%")
             ->orWhere('display_name', 'like', "%{$query}%")
-            ->select('id', 'username', 'display_name', 'bio', 'created_at')
+            ->select('id', 'username', 'display_name', 'bio', 'emoji_avatar', 'created_at')
             ->limit(20)
             ->get();
 
@@ -122,11 +127,25 @@ class UserController extends Controller
             'id' => $user->id,
             'username' => $user->username,
             'display_name' => $user->display_name,
+            'emoji_avatar' => $user->emoji_avatar,
             'bio' => $user->bio,
             'joined_at' => $user->created_at->toDateString(),
             'watchlist' => $user->watchlistItems,
             'favorites' => $user->favorites,
             'reviews' => $user->reviews,
+        ]);
+    }
+
+    public function people(Request $request)
+    {
+        $users = User::query()
+            ->select('id', 'username', 'display_name', 'bio', 'emoji_avatar', 'created_at')
+            ->limit(3)
+            ->whereNot('id', Auth::user()->id)
+            ->get();
+
+        return response()->json([
+            'results' => $users,
         ]);
     }
 }

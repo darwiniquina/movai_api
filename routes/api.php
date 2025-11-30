@@ -131,6 +131,7 @@ Route::middleware(['auth:sanctum', 'verified', 'throttle:60,1'])->group(function
 
     Route::prefix('users')->controller(UserController::class)->group(function () {
         Route::get('search', 'search');
+        Route::get('people', 'people');
         Route::get('{user}', 'show');
     });
 });
